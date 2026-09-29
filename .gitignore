@@ -1,0 +1,27 @@
+# Data is downloaded or derived, never committed.
+data/
+outputs/
+*.parquet
+*.tif
+*.tiff
+
+# Paper drafts and review material stay out of the public repo.
+*.docx
+*.pdf
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+env/
+.ipynb_checkpoints/
+*.egg-info/
+.pytest_cache/
+
+# Editors and OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+desktop.ini

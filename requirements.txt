@@ -1,0 +1,13 @@
+# Pinned to the versions the published results were produced with.
+# Newer versions of xgboost may shift Stage 3 by ~0.001 through RNG changes.
+numpy==2.5.2
+pandas==2.3.3
+scipy==1.18.0
+scikit-learn==1.9.0
+statsmodels==0.14.6
+xgboost==3.4.1
+matplotlib==3.11.1
+pyarrow==25.0.0
+tifffile==2026.9.15
+shap>=0.44
+pytest>=8.0
