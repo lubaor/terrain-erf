@@ -32,13 +32,19 @@ over a GLM by a factor of six.
 | Baseline plus the ERF | 0.1252 |
 | Gradient boosting on the full terrain feature set | 0.3356 |
 
-| Validation scheme | Elevation lift | Boosting advantage over the GLM |
-|---|---|---|
-| Random 5-fold | +0.0309 | +0.2054 |
-| Grouped on loss year | +0.0320 | +0.0328 |
+| Validation scheme | Elevation lift | Boosting advantage | TabPFN advantage |
+|---|---|---|---|
+| Random 5-fold | +0.0309 | +0.2054 | +0.2046 |
+| Grouped on loss year | +0.0320 | +0.0328 | +0.0160 |
 
 The elevation lift is unchanged when whole loss years are held out. The boosting
 advantage falls by 84% and its interval includes zero.
+
+The last column is the check on that. TabPFN is a pretrained tabular foundation
+model: no Tweedie objective, nothing tuned, and none of the inductive bias of a
+tree ensemble. Given the same features it matches gradient boosting under random
+splitting and then loses the same advantage under grouped validation. The
+collapse is a property of event-clustered data rather than of boosting.
 
 Other findings, with the scripts that produce them:
 
@@ -60,6 +66,7 @@ erf/
   spec.py         the model specification: derived columns, split, Gini, fitters
   validation.py   repeated splits, grouped CV, leave-one-year-out, bootstrap
   terrain.py      DEM reading, elevation sampling, topographic position index
+  tabpfn_model.py TabPFN subsample ensemble (optional, needs torch)
   data.py         OpenFEMA download
 scripts/
   01_download_claims.py        fetch the raw claims for a state
@@ -67,6 +74,7 @@ scripts/
   03_factorial.py              separate feature set from model class
   04_validation_design.py      random vs grouped, and effective sample size
   05_topographic_position.py   does surrounding terrain add anything
+  06_tabpfn.py                 does the validation result survive a foundation model
 tests/                         unit tests, no dataset required
 docs/RESULTS.md                the full result set with caveats
 ```
@@ -82,7 +90,7 @@ module is the fix.
 ```bash
 python -m venv .venv && source .venv/bin/activate   # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
-pytest                                              # 17 tests, no data needed
+pytest                                              # 27 tests, no data needed
 python scripts/02_reproduce.py                      # the gate
 ```
 

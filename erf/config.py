@@ -80,3 +80,26 @@ XGB_PARAMS = dict(
     eval_metric="tweedie-nloglik@1.5",
     early_stopping_rounds=30,
 )
+
+# ------------------------------------------------------------------- TabPFN
+# The same nine features as gradient boosting, so the comparison isolates the
+# model rather than the inputs.
+#
+# TabPFN attends over its training rows at prediction time, so cost grows with
+# training rows multiplied by test rows, and the pretraining regime tops out
+# near ten thousand rows. A standard training split is 102,900. It is therefore
+# covered by an ensemble of disjoint subsamples rather than by one oversized
+# fit. Four members of ten thousand put 39% of the training set in front of the
+# model, at roughly two CPU-hours for the full set of folds below.
+#
+# n_estimators is TabPFN's own internal ensemble over preprocessing
+# configurations. It is set to one because the subsample ensemble already does
+# the averaging, and because the internal ensemble multiplies runtime directly.
+TABPFN_FEATURES = list(XGB_FEATURES)
+TABPFN_CONTEXT = 10_000
+TABPFN_MEMBERS = 4
+TABPFN_DEVICE = os.environ.get("ERF_TABPFN_DEVICE", "cpu")
+
+TABPFN_PARAMS = dict(
+    n_estimators=1,
+)

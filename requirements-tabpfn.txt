@@ -1,0 +1,19 @@
+# Optional. Only needed for scripts/06_tabpfn.py.
+#
+# Kept separate from requirements.txt because TabPFN pulls in torch and a
+# transformer stack, which is a heavy dependency for a repo whose headline
+# results are a GLM and a boosted tree. Install it on top of requirements.txt,
+# which is itself pinned:
+#
+#   pip install -r requirements.txt
+#   pip install -c requirements.txt -r requirements-tabpfn.txt
+#
+# The -c is deliberate. It stops the TabPFN install from moving numpy, pandas,
+# scikit-learn, statsmodels or xgboost, any of which would put the published
+# figures out of reach. scripts/02_reproduce.py still passes 9/9 afterwards.
+#
+# This is the CPU build. On a CUDA machine install the matching torch wheel from
+# https://download.pytorch.org/whl/ instead and set ERF_TABPFN_DEVICE=cuda,
+# which takes the full run from roughly two hours to a few minutes.
+torch==2.14.1
+tabpfn==9.1.0

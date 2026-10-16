@@ -135,6 +135,71 @@ estimator on thin data rather than a weakness of the variable. Intervals come
 from a bootstrap that resamples whole years, since years are the independent
 unit.
 
+### Does the collapse survive a different model class?
+
+The obvious objection to the result above is that it says something about
+gradient boosting rather than about the data. TabPFN is the cleanest available
+test of that objection. It is a pretrained tabular foundation model: it does its
+fitting in context, it is given no Tweedie objective, it has no depth or
+learning rate to tune, and it shares none of the inductive bias of an additive
+tree ensemble. It received the same nine features, built by the same function,
+and the raw response.
+
+Because it attends over its training rows at prediction time, its context tops
+out near ten thousand rows against 102,900 in a training split. It is therefore
+run as an ensemble of four disjoint ten-thousand-row subsamples, which puts 39%
+of the training set in front of the model. Script 06.
+
+| | Random 5-fold | Year-grouped |
+|---|---|---|
+| Baseline | +0.0979 ± 0.0023 | +0.0564 ± 0.0820 |
+| Elevation model | +0.1288 ± 0.0028 | +0.0884 ± 0.1006 |
+| Gradient boosting | +0.3342 ± 0.0039 | +0.1212 ± 0.1323 |
+| TabPFN | +0.3333 ± 0.0041 | +0.1044 ± 0.1409 |
+| **Elevation lift** | **+0.0309 ± 0.0009** | **+0.0320 ± 0.0240** |
+| **Boosting advantage** | **+0.2054 ± 0.0042** | **+0.0328 ± 0.0797** |
+| **TabPFN advantage** | **+0.2046 ± 0.0047** | **+0.0160 ± 0.0763** |
+
+Under random splitting TabPFN matches gradient boosting: +0.3333 against
++0.3342, a gap of 0.0009 against a fold standard deviation of 0.004. It does so
+with nothing tuned, no distributional assumption supplied and 39% of the
+training rows. On the reference 80/20 split it scores +0.3332 against boosting's
++0.3360.
+
+Holding out whole loss years, it collapses in the same way. The advantage over
+the interpretable GLM falls from +0.2046 to +0.0160, and a bootstrap resampling
+whole years puts the remainder at +0.0158 [-0.0265, +0.0842], which includes
+zero.
+
+| Model | Random | Year-grouped | Share of the advantage lost |
+|---|---|---|---|
+| Gradient boosting | +0.2054 | +0.0328 | 84% |
+| TabPFN | +0.2046 | +0.0160 | 92% |
+
+This is the result the section was run to obtain. The collapse is a property of
+event-clustered data, not of tree ensembles. Two model classes with almost
+nothing in common gain an almost identical amount from random splitting, and
+both lose nearly all of it when event identity can no longer leak across the
+split. Meanwhile the elevation lift is unchanged at +0.0320 and excludes zero at
++0.0321 [+0.0160, +0.0522].
+
+Three cautions, because the grouped column is noisy.
+
+The apparent shortfall of TabPFN against boosting under grouped validation,
++0.1044 against +0.1212, is not a real difference. The fold standard deviations
+are ±0.13 and ±0.14 and there are five folds of a dataset carrying roughly 3.55
+independent observations. Nothing here distinguishes the two.
+
+The same applies to 92% against 84%. Both intervals include zero, so the
+ordering of the two percentages carries no weight. The defensible statement is
+that both collapse, not that one collapses further.
+
+The fold holding out 2005 is where the models break down, and it is half the
+dataset. Every model scores at or below zero on it except gradient boosting at
++0.0084, with TabPFN at -0.0490 and the elevation GLM at -0.0344. A model that
+has never seen Katrina and Rita cannot rank them. This is the single clearest
+statement of how concentrated the data is.
+
 ---
 
 ## 4. Surrounding terrain
