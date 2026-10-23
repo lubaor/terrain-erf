@@ -168,3 +168,6 @@ Redacted Claims dataset, public domain. Elevation from the
 
 Code released under the Apache License 2.0, Copyright 2026 Earnix.
 See `LICENSE` and `NOTICE`.
+
+The views expressed in this repository and its documentation are those of the
+author and do not necessarily represent the views of Earnix.
