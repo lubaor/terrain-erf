@@ -171,3 +171,12 @@ See `LICENSE` and `NOTICE`.
 
 The views expressed in this repository and its documentation are those of the
 author and do not necessarily represent the views of Earnix.
+
+## AI use
+
+Anthropic's Claude was used as a coding and drafting assistant for this
+codebase and the accompanying paper: implementing and running the modelling and
+validation code, producing the figures and tables, and drafting and revising
+parts of the text. All modelling decisions, interpretations and conclusions are
+the author's. `scripts/02_reproduce.py` is the check on that: it asserts nine
+published quantities and exits non-zero if any of them fail to reproduce.
