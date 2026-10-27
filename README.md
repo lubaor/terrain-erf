@@ -166,7 +166,7 @@ Claims data from the [OpenFEMA](https://www.fema.gov/about/openfema) NFIP
 Redacted Claims dataset, public domain. Elevation from the
 [USGS 3DEP](https://www.usgs.gov/3d-elevation-program) programme, public domain.
 
-Code released under the Apache License 2.0, Copyright 2026 Earnix.
+Code released under the Apache License 2.0, Copyright 2026 Earnix Ltd.
 See `LICENSE` and `NOTICE`.
 
 The views expressed in this repository and its documentation are those of the
