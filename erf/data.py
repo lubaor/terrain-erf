@@ -10,6 +10,17 @@ Filtering to one state and the columns actually needed turns that into about
 
 The documented bulk URL under /about/reports-and-data/openfema/ returns 403.
 The working endpoint is the one used below.
+
+Endpoint version: OpenFEMA retired v2 and renamed the resource. The dataset is
+now /api/open/v3/NfipClaims, the response key is "NfipClaims" rather than
+"FimaNfipClaims", and the name in the OpenFemaDataSetFields registry changed to
+match. The v2 path now returns 404, so this is a breaking change rather than a
+deprecation. All 33 requested field names survived the move unchanged.
+
+The claims file is live and grows. Louisiana stood at 484,979 claims when the
+paper's dataset was built and at 485,743 on 9 November 2026, so a fresh download
+will not byte-match the published figures. Reproduce from
+data/nfip_with_erf.parquet, which is frozen.
 """
 from __future__ import annotations
 
@@ -23,7 +34,7 @@ import pandas as pd
 
 from . import config as cfg
 
-BASE = "https://www.fema.gov/api/open/v2/FimaNfipClaims"
+BASE = "https://www.fema.gov/api/open/v3/NfipClaims"
 PAGE = 10_000
 UA = "Mozilla/5.0 (compatible; erf-research/1.0)"
 
@@ -104,7 +115,7 @@ def download_claims(state: str = "LA", out: Path | None = None,
                 "$select": ",".join(FIELDS),
                 "$top": str(PAGE), "$skip": str(skip), "$orderby": "id"}))
             cached.write_bytes(raw)
-        frames.append(pd.DataFrame(json.loads(raw)["FimaNfipClaims"]))
+        frames.append(pd.DataFrame(json.loads(raw)["NfipClaims"]))
         if i % 10 == 0 or i == n_pages:
             print(f"  page {i}/{n_pages}")
 
@@ -124,7 +135,7 @@ def field_definition(name: str) -> str:
     """
     url = ("https://www.fema.gov/api/open/v1/OpenFemaDataSetFields?"
            + urllib.parse.urlencode(
-               {"$filter": f"openFemaDataSet eq 'FimaNfipClaims' "
+               {"$filter": f"openFemaDataSet eq 'NfipClaims' "
                            f"and name eq '{name}'"},
                quote_via=urllib.parse.quote))
     rows = json.loads(_get(url)).get("OpenFemaDataSetFields", [])
