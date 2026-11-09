@@ -1,9 +1,16 @@
-# Data is downloaded or derived, never committed.
-data/
+# Data is downloaded or derived and is not committed, with one exception.
+#
+# data/nfip_with_erf.parquet is the frozen modelling dataset. Everything in the
+# analysis reproduces from it, including scripts/02_reproduce.py, so the repo is
+# not checkable without it. It is 2.4 MB, derived entirely from public-domain
+# FEMA and USGS sources, and carries no claim identifiers and no dates beyond
+# the loss year. The coordinates are FEMA's own censored values at 0.1 degrees.
+data/*
 outputs/
 *.parquet
 *.tif
 *.tiff
+!data/nfip_with_erf.parquet
 
 # Paper drafts and review material stay out of the public repo.
 *.docx

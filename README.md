@@ -75,6 +75,7 @@ scripts/
   04_validation_design.py      random vs grouped, and effective sample size
   05_topographic_position.py   does surrounding terrain add anything
   06_tabpfn.py                 does the validation result survive a foundation model
+  07_reconstruct_dataset.py    how close the documented recipe gets to the dataset
 tests/                         unit tests, no dataset required
 docs/RESULTS.md                the full result set with caveats
 ```
@@ -100,31 +101,63 @@ passes.
 
 ## Data
 
-**Nothing in `data/` is committed.** The sources are public but large, and some
-are derived.
+**The modelling dataset is committed. Nothing else in `data/` is.** The other
+sources are public but large.
 
-| File | Size | How to get it |
-|---|---|---|
-| `nfip_with_erf.parquet` | 2.3 MB | The modelling dataset. See the note below. |
-| `la_claims.parquet` | 28 MB | `python scripts/01_download_claims.py LA` |
-| `louisiana_dem_90m.tif` | 130 MB | USGS 3DEP, one Louisiana tile at 1/3 arc-second, retrievable through `py3dep`. Only needed for script 05. |
+| File | Size | Committed | How to get it |
+|---|---|---|---|
+| `nfip_with_erf.parquet` | 2.4 MB | **yes** | In the repo. Everything reproduces from it. |
+| `la_claims.parquet` | 28 MB | no | `python scripts/01_download_claims.py LA` |
+| `louisiana_dem_90m.tif` | 130 MB | no | USGS 3DEP, one Louisiana tile at 1/3 arc-second, retrievable through `py3dep`. Only needed for scripts 05 and 07. |
 
-### A limitation worth stating plainly
+`nfip_with_erf.parquet` carries no claim identifiers and no dates beyond the
+loss year, and its coordinates are FEMA's own censored values at 0.1 degrees,
+about 11 km. It is derived entirely from public-domain federal sources.
+
+**The raw claims file is live and grows.** Louisiana stood at 484,979 claims
+when the modelling dataset was built and at 485,743 on 9 November 2026. A fresh
+download will not byte-match the published figures. Reproduce from the committed
+parquet, which is frozen.
+
+### The one thing that is not reproducible here
+
+**The code that originally built `nfip_with_erf.parquet` from raw claims, the
+DEM and a building-footprint layer is not in this repository.** It predates this
+codebase and was not recovered. If you are looking for it, stop here: it does
+not exist in any form I can publish.
+
+`scripts/07_reconstruct_dataset.py` implements the documented recipe instead and
+reports exactly how far it gets. It is an approximation, not the original, and
+it is labelled as one.
 
 `nfip_with_erf.parquet` is the analysis dataset: 128,626 Louisiana claims with
 the certified elevation difference, the sampled terrain features and the derived
-banding. **The code that originally built it from raw claims, the DEM and a
-building-footprint layer is not in this repository.** It predates this codebase
-and was not recovered.
+banding.
 
 Everything from that file onward is fully reproducible here, which is the whole
-analysis. The upstream construction is documented rather than executable. The
-closest reconstruction, from the raw claims alone, is to filter to the state,
-require a non-null elevation difference within ±30 ft, a positive paid building
-amount and present coordinates. That yields 130,586 rows against the 128,626 in
-the modelling file, so roughly 1,960 rows are removed by an upstream step that
-is not documented. The footprint layer is absent entirely, and with coordinates
-censored to 0.1 degree it could not be used meaningfully in any case.
+analysis.
+
+Script 07 runs the documented recipe: filter to the state, require a non-null
+elevation difference within ±30 ft, a positive paid building amount, and present
+coordinates. Run on 9 November 2026 it yields 130,656 rows against the 128,626
+in the modelling file, a gap of about 2,030. Part of that gap is an undocumented
+upstream step and part is that the claims file has grown since. The gap is not
+closed by anything in this repo.
+
+How close is it otherwise? Every shared numeric column lands within 1% of the
+published mean, including paid loss at 0.83%, the ERF at 0.24% and loss year at
+0.00%. So the row filter is substantially right and whatever else the original
+pipeline did was small and not strongly selective. That is evidence, not proof.
+
+Three columns cannot be reconstructed at all. `slope_deg`, `aspect_deg` and
+`terrain_ruggedness` were computed by the pipeline that was not recovered, and
+their definitions are not in this repository. Script 07 leaves them out rather
+than guess: a reconstruction that invented a slope definition would produce a
+comparison that means nothing either way. With the DEM tile present it does
+recover `dem_elevation_m`.
+
+The building-footprint layer is absent entirely, and with coordinates censored
+to 0.1 degree it could not have been doing much work in any case.
 
 If you are reproducing this from scratch, start from the published dataset
 rather than trying to rebuild it.
